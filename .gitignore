@@ -1,0 +1,7 @@
+.env
+.vscode
+./espn-api
+__pycache__
+.venv
+.idea
+.pytest_cache
