@@ -1,6 +1,6 @@
 .env
 .vscode
-./espn-api
+espn-api/
 __pycache__
 .venv
 .idea
