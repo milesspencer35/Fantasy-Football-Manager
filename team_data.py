@@ -13,6 +13,10 @@ ESPN_S2 = os.getenv("ESPN_S2")
 ESPN_SWID = os.getenv("ESPN_SWID")
 TEAM_NAME = os.getenv("TEAM_NAME")
 
+BENCH_COUNT = 7
+IR_COUNT = 1
+SCORING_TYPE = "Full PPR"
+
 
 def kicking_get_breakdown(breakdown):
 	return {
@@ -184,7 +188,7 @@ class TeamData(object):
 	def league_data(self):
 		data = {
 			"current_week": self.league.current_week,
-			"scoring_type": "Full PPR",
+			"scoring_type": SCORING_TYPE,
 			"roster_positions": [
 				"QB",
 				"RB",
@@ -196,8 +200,8 @@ class TeamData(object):
 				"DST",
 				"K"
 			],
-			"bench_count": 7,
-			"IR_count": 1
+			"bench_count": BENCH_COUNT,
+			"IR_count": IR_COUNT
 		}
 
 		return data
