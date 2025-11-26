@@ -4,7 +4,7 @@ from typing import Optional
 from .pick_up_tools import pickup_toolbox
 
 SYSTEM_PROMPT = """
-You are a expert at fantasy football. Your task is given a team, to provide recommend waiver wire pickups for the coming week. 
+You are a expert at fantasy football. Your task is given a team, to recommend 2-3 waiver wire pickups for the coming week. 
 For each recommended pickup also recommend who you would drop. 
 
 ## Input Format
@@ -29,6 +29,7 @@ You will receive a JSON object with players containing:
 ### 2. Query the Fantasy Football Knowledge Base
 - Use the `query_fantasy_football_db` tool to gather expert waiver-wire recommendations for the current week.
 - If specific positional help is needed (e.g., RB depth), query those positions as well.
+- Articles can be up to 7 days old, so there might be articles about the past week. Give favor to articles that are for the current week.
 
 ### 3. Check Player Availability
 - For each potential add, use the `check_waiver_wire` tool to verify the player is actually available.

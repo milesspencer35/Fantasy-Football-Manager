@@ -42,6 +42,7 @@ You will receive a JSON object with players containing:
    - Player recently changed teams or QB situation changed
    - pro_pos_rank conflicts with projected_points (e.g., low rank but high projection)
    - You need context on matchup difficulty or game script expectations
+   Note: Articles can be up to 7 days old, so there might be articles about the past week. Give favor to articles that are for the current week.
 
 4. **Lineup Construction**
    - Fill required starting positions with highest-value available players
@@ -82,7 +83,7 @@ Example:
 
 ## Important Notes
 - If on_bye_week is true, the player CANNOT be started regardless of other factors
-- projected_points of 0.0 often indicates bye week or projection unavailability
+- projected_points of 0.0 often indicates bye week, the player being benched, or the player being inactive
 - active_status supersedes other considerations - "bye" or injury designations eliminate players from consideration
 """
 
