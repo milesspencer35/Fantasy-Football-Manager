@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 from chroma_db_setup import get_chroma_client, get_embedding_function
 try:
     from tools import ToolBox
@@ -67,15 +68,32 @@ def check_waiver_wire(player_name: str):
         player_name (str): The name of the player to check
 
     Returns:
-        dict: A dictionary containing the player name, whether they were found, and whether they are on the waiver wire
+        json: A json containing the player name, whether they were found, and whether they are on the waiver wire
     """
     team_data = TeamData()
     player = team_data.league.player_info(player_name)
     print("Checking waiver wire for player: ", player_name)
     if player is None:
         print("Player not found: ", player_name)
-    return {
+    return json.dumps({
         "player_name": player_name,
         "found": player is not None,
         "on_waiver_wire": player.onTeamId == 0 if player else None,
-    }
+    })
+
+@pickup_toolbox.tool
+def get_player_stats(player_name: str):
+    """
+    Get player stats for a specific player.
+
+    Note: For defenses, format name with "{Mascot} D/ST" (ex. "Broncos D/ST", "Texans D/ST")
+
+    Args:
+        player_name (str): The name of the player to get stats for
+
+    Returns:
+        json: A json containing the player name, position, average points for the season, and past weeks data
+    """
+    print("Getting player stats for player: ", player_name)
+    team_data = TeamData()
+    return json.dumps(team_data.get_player_info(player_name))

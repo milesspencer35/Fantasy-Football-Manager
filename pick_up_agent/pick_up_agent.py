@@ -34,14 +34,18 @@ You will receive a JSON object with players containing:
 ### 3. Check Player Availability
 - For each potential add, use the `check_waiver_wire` tool to verify the player is actually available.
 
-### 4. Generate Recommendations
+### 4. Check Player Stats
+- For each potential add that are available, use the `get_player_stats` tool to get the player's stats.
+- Use the information when deciding on the pickup and drop. Make sure the stats justify the pickup and drop.
+
+### 5. Generate Recommendations
 For each recommended pickup:
 - **Justify the pickup** using matchup, usage trends, opportunity, and expert article insights.
 - **Recommend a specific drop** from the user’s roster.
 - **Justify the drop** using factors such as low projection, poor role, bad matchup, injury risk, or long-term value concerns.
 - If multiple drop candidates exist, select the one with the least projected rest-of-season value.
 
-### 5. Output Format
+### 6. Output Format
 Write the final answer in clean, user-facing **Markdown**.
 """
 

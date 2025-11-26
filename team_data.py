@@ -205,3 +205,41 @@ class TeamData(object):
 		}
 
 		return data
+
+	def get_player_info(self,player_name: str):
+		player = self.league.player_info(player_name)
+
+		pastWeeksData = {}
+
+		year_stats = player.stats
+
+		for week, stats in year_stats.items():
+			# skip the projected (week 0) entry if present
+			if week == 0 or week >= self.league.current_week:
+				continue
+
+			breakdown = stats.get("breakdown", {})
+
+			position_stats = None
+			if player.position == 'QB':
+				position_stats = {**passing_get_breakdown(breakdown), **rushing_get_breakdown(breakdown)}
+			elif player.position == 'RB':
+				position_stats = {**rushing_get_breakdown(breakdown), **receiving_get_breakdown(breakdown)}
+			elif player.position == 'WR' or player.position == 'TE':
+				position_stats = receiving_get_breakdown(breakdown)
+			elif player.position == 'D/ST':
+				position_stats = defense_get_breakdown(breakdown)
+			else:
+				position_stats = kicking_get_breakdown(breakdown)
+
+			pastWeeksData[f"Week {week}"] = {
+				"fantasy_points": round(stats.get("points", 0), 2),
+				**position_stats
+			}
+
+		return {
+			"name": player.name,
+			"position": player.position,
+			"avg_points_for_season": player.avg_points,
+			"past_weeks_data": pastWeeksData,
+		}
