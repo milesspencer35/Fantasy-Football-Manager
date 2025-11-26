@@ -16,7 +16,7 @@ load_dotenv()
 
 # --- Configuration ---
 RSS_FEEDS = [
-    "https://www.pff.com/feed",
+    "https://www.fantasypros.com/news/correspondents/pat-fitzmaurice.php",
     "https://football.razzball.com/feed",
     "https://www.draftsharks.com/rss/advice",
     "https://www.rotowire.com/rss/news.php?sport=NFL",

@@ -1,6 +1,5 @@
 from llm_agent import LlmAgent
 from typing import Optional
-from team_data import TeamData
 
 from .lineup_tools import lineup_toolbox
 
@@ -88,14 +87,14 @@ Example:
 """
 
 class LineupAgent(LlmAgent):
-    def __init__(self, model: Optional[str] = None):
+    def __init__(self, team_data_json: str, model: Optional[str] = None):
         super().__init__(system_prompt=SYSTEM_PROMPT, model=model)
-        self.team_data = TeamData()
+        self.team_data_json = team_data_json
 
     async def evaluate(self):
         return await self.execute(
             prompt=f"""
             Here is the json object containing player information: 
-            \n {self.team_data.team_analyzer_json_data()}""",
+            \n {self.team_data_json}""",
             toolbox=lineup_toolbox
         )

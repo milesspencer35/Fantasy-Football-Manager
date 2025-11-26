@@ -83,7 +83,7 @@ class TeamData(object):
 			"players": self.players_data()
 		}
 
-		print(json.dumps(data, indent=2))
+		# print(json.dumps(data, indent=2))
 
 		return json.dumps(data, indent=2)
 

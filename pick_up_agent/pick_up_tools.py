@@ -7,22 +7,46 @@ except ImportError:
     sys.path.append(os.path.dirname(__file__))
     from tools import ToolBox
 
-toolbox = ToolBox()
+from team_data import TeamData
 
-@toolbox.tool
-def query_vector_db(query: str, n_results: int = 3):
+pickup_toolbox = ToolBox()
+
+@pickup_toolbox.tool
+def query_fantasy_football_db(query: str, n_results: int = 3):
+    """
+    Query the fantasy football articles database using semantic search.
+
+    Searches a ChromaDB collection of fantasy football articles and returns
+    the most relevant documents based on the query text using embedding-based
+    similarity search.
+
+    Args:
+        query (str): The search query text to find relevant articles
+        n_results (int, optional): Maximum number of results to return.
+            Defaults to 3.
+
+    Returns:
+        list[dict]: A list of matching documents, where each dict contains:
+            - id (str): The unique document identifier
+            - text (str): The full document text content
+            - score (float): The distance score (lower is more similar)
+
+    Example:
+        > results = query_fantasy_football_db("Drake Maye performance", n_results=5)
+        > print(results[0]['text'][:100])
+    """
     client = get_chroma_client()
     collection = client.get_collection(
         name='fantasy_football_articles',
         embedding_function=get_embedding_function()
     )
 
+    print(f"Querying fantasy football vector db: {query}, n_results: {n_results}")
+
     results = collection.query(
         query_texts=[query],
         n_results=n_results,
     )
-
-    print(results)
 
     return [
         {"id": doc_id, "text": doc_text, "score": score}
@@ -30,3 +54,28 @@ def query_vector_db(query: str, n_results: int = 3):
             results["ids"][0], results["documents"][0], results["distances"][0]
         )
     ]
+
+## tool to see if a player is on the waiver wire or not
+@pickup_toolbox.tool
+def check_waiver_wire(player_name: str):
+    """
+    Check if a player is on the waiver wire.
+
+    Note: For defenses, format name with "{Mascot} D/ST" (ex. "Broncos D/ST", "Texans D/ST")
+
+    Args:
+        player_name (str): The name of the player to check
+
+    Returns:
+        dict: A dictionary containing the player name, whether they were found, and whether they are on the waiver wire
+    """
+    team_data = TeamData()
+    player = team_data.league.player_info(player_name)
+    print("Checking waiver wire for player: ", player_name)
+    if player is None:
+        print("Player not found: ", player_name)
+    return {
+        "player_name": player_name,
+        "found": player is not None,
+        "on_waiver_wire": player.onTeamId == 0 if player else None,
+    }
