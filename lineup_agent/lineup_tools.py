@@ -1,6 +1,6 @@
 import sys
 import os
-from chroma_db_setup import get_chroma_client, get_embedding_function
+from chroma_db.ChromaDBManager import ChromaDBManager
 try:
     from tools import ToolBox
 except ImportError:
@@ -33,22 +33,18 @@ def query_fantasy_football_db(query: str, n_results: int = 3):
         > results = query_fantasy_football_db("Drake Maye performance", n_results=5)
         > print(results[0]['text'][:100])
     """
-    client = get_chroma_client()
-    collection = client.get_collection(
-        name='fantasy_football_articles',
-        embedding_function=get_embedding_function()
-    )
+    chroma_db_manager = ChromaDBManager()
 
     print(f"Querying fantasy football vector db: {query}, n_results: {n_results}")
 
-    results = collection.query(
+    results = chroma_db_manager.collection.query(
         query_texts=[query],
         n_results=n_results,
     )
 
     return [
-        {"id": doc_id, "text": doc_text, "score": score}
-        for doc_id, doc_text, score in zip(
-            results["ids"][0], results["documents"][0], results["distances"][0]
+        {"url": meta.get("url"), "text": doc_text, "score": score}
+        for meta, doc_text, score in zip(
+            results["metadatas"][0], results["documents"][0], results["distances"][0]
         )
     ]

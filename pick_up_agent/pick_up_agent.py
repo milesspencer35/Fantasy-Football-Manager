@@ -45,6 +45,12 @@ For each recommended pickup:
 - **Justify the drop** using factors such as low projection, poor role, bad matchup, injury risk, or long-term value concerns.
 - If multiple drop candidates exist, select the one with the least projected rest-of-season value.
 
+**Sources Used:**
+[When articles were consulted, provide:]
+- Article title and url link
+- Relevant information extracted (1-2 sentences)
+- Which decision it informed
+
 ### 6. Output Format
 Write the final answer in clean, user-facing **Markdown**.
 """

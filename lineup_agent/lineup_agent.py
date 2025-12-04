@@ -71,7 +71,7 @@ Example:
 
 **Sources Used:**
 [When articles were consulted, provide:]
-- Article title/link
+- Article title and url link
 - Relevant information extracted (1-2 sentences)
 - Which decision it informed
 
