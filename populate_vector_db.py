@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from chroma_db.ChromaDBManager import ChromaDBManager
 from chroma_db.Article import Article
 from openai import OpenAI
+from scraper.scraper import Scraper
 
 load_dotenv()
 
@@ -89,7 +90,7 @@ def process_feed(feed_url, max_age_days=14):
         return []
 
 # --- Main pipeline ---
-def run_pipeline(max_age_days=14):
+def rss_run_pipeline(max_age_days=14):
     """Run the pipeline with configurable max article age."""
     print(f"\nFetching articles from the last {max_age_days} days...\n")
 
@@ -105,10 +106,20 @@ def run_pipeline(max_age_days=14):
         else:
             print("No recent articles to store from this feed\n")
 
+def site_run_pipeline(max_age_days=14):
+    """Run the pipeline with configurable max article age."""
+    print(f"\nFetching articles from the last {max_age_days} days...\n")
+
+    scraper = Scraper()
+    articles = scraper.scrape()
+
+    chroma_db_manager.store_articles_in_vector_db(articles)
+
 if __name__ == "__main__":
     chroma_db_manager.cleanup_old_articles(max_age_days=7)
 
-    run_pipeline(max_age_days=7)
+    rss_run_pipeline(max_age_days=7)
+    site_run_pipeline(max_age_days=7)
 
     # Verify what's in the database
     print("\n" + "=" * 60)

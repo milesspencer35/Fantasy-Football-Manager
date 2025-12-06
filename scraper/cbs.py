@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from chroma_db.Article import Article
+from datetime import datetime
 
 def cbs_find_links(html, base):
     soup = BeautifulSoup(html, "html.parser")
@@ -21,14 +23,16 @@ def cbs_parse_article(html, url):
 
     title = soup.find("h1").get_text(strip=True) if soup.find("h1") else ""
 
-    author_el = soup.select_one(".author-name, .ArticleAuthor-name")
-    author = author_el.get_text(strip=True) if author_el else ""
-
     time_el = soup.find("time")
-    published = time_el.get("datetime", "") if time_el else ""
+    if time_el:
+        date_str = time_el.get("datetime", "")
+        date_str = date_str.replace(" UTC", "+00:00")
+        date = datetime.fromisoformat(date_str)
+    else:
+        date = datetime.now()
 
-    dek_el = soup.select_one(".ArticleDek, .article-dek")
-    summary = dek_el.get_text(" ", strip=True) if dek_el else ""
+    if not Article.is_recent_article(date):
+        return None
 
     # CBS article body selector
     body_el = soup.select_one(".Article-body, .article-body")
@@ -37,12 +41,4 @@ def cbs_parse_article(html, url):
         ps = body_el.find_all("p")
         body = "\n\n".join(p.get_text(" ", strip=True) for p in ps)
 
-    return {
-        "site": "CBS Sports",
-        "title": title,
-        "url": url,
-        "author": author,
-        "published": published,
-        "summary": summary,
-        "body": body
-    }
+    return Article(title, url, body, "CBS", date)

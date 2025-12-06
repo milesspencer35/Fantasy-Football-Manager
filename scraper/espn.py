@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import json
+from chroma_db.Article import Article
+from datetime import datetime
 
 def espn_find_links(html, base):
     soup = BeautifulSoup(html, "html.parser")
     links = set()
 
-    for a in soup.select("a.contentItem__title.contentItem__title--story"):
+    for a in soup.select("a.contentItem__padding.contentItem__padding--border"): # contentItem__padding contentItem__padding--border
         href = a.get("href")
         if not href:
             continue
@@ -14,38 +17,57 @@ def espn_find_links(html, base):
     return list(links)
 
 
-def espn_parse_article(html, url):
-    soup = BeautifulSoup(html, "html.parser")
-    title = soup.find("h1").get_text(strip=True) if soup.find("h1") else ""
+def espn_parse_article(html, url) -> Article:
+	soup = BeautifulSoup(html, "html.parser")
 
-    # Author / publish time
-    author = ""
-    published = ""
-    meta_author = soup.find("meta", attrs={"name": "author"})
-    if meta_author:
-        author = meta_author.get("content", "")
+	# Title - original method works best
+	title = soup.find("h1").get_text(strip=True) if soup.find("h1") else ""
 
-    meta_time = soup.find("meta", attrs={"property": "article:published_time"})
-    if meta_time:
-        published = meta_time.get("content", "")
+	# Author and publish time from JSON-LD structured data
+	author = ""
+	date = ""
 
-    # Summary
-    summary_el = soup.select_one(".dek, .summary, .article-subhead")
-    summary = summary_el.get_text(" ", strip=True) if summary_el else ""
+	# Try to get from JSON-LD script tag
+	json_ld_scripts = soup.find_all("script", type="application/ld+json")
+	for script in json_ld_scripts:
+		try:
+			data = json.loads(script.string)
+			if data.get("@type") == "NewsArticle":
+				# Get author
+				if "author" in data:
+					author_data = data["author"]
+					if isinstance(author_data, dict):
+						author = author_data.get("name", "")
+					elif isinstance(author_data, str):
+						author = author_data
 
-    # Body
-    body = ""
-    art = soup.select_one("article")
-    if art:
-        ps = art.find_all("p")
-        body = "\n\n".join(p.get_text(" ", strip=True) for p in ps)
+				# Get published date
+				date = datetime(data.get("datePublished", ""))
+				break
+		except:
+			continue
 
-    return {
-        "site": "ESPN",
-        "title": title,
-        "url": url,
-        "author": author,
-        "published": published,
-        "summary": summary,
-        "body": body
-    }
+	# Fallback: try meta tags if JSON-LD didn't work
+	if not date:
+		meta_time = soup.find("meta", attrs={"name": "DC.date.issued"})
+		if meta_time:
+			date = datetime.fromisoformat(meta_time.get("content", ""))
+
+	if not Article.is_recent_article(date):
+		return None
+
+	# Body - the article content is in .article-body div
+	body = ""
+	article_body = soup.find("div", class_="article-body")
+	if article_body:
+		# Get all paragraphs within article-body
+		ps = article_body.find_all("p")
+		body = "\n\n".join(p.get_text(" ", strip=True) for p in ps if p.get_text(strip=True))
+
+	# Skip articles with very little text (likely table/data heavy)
+	# Adjust the threshold as needed (500 characters is a reasonable minimum)
+	if len(body) < 500:
+		return None
+
+	return Article(title, url, body, "ESPN", date)
+

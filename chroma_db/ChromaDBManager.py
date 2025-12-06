@@ -3,7 +3,7 @@ import chromadb
 import os
 from dotenv import load_dotenv
 from chromadb.utils import embedding_functions
-from typing import List
+from typing import List, Dict, Any, Optional
 from .Article import Article
 from datetime import datetime, timedelta
 load_dotenv()
@@ -87,13 +87,11 @@ class ChromaDBManager:
                 print("No documents in collection")
                 return
 
-            cutoff_date = datetime.now() - timedelta(days=max_age_days)
             ids_to_delete = []
 
             for i, metadata in enumerate(all_docs['metadatas']):
                 if 'date' in metadata:
-                    article_date = datetime.fromisoformat(metadata['date'])
-                    if article_date < cutoff_date:
+                    if not Article.is_recent_article(metadata['date'], max_age_days):
                         ids_to_delete.append(all_docs['ids'][i])
 
             if ids_to_delete:
